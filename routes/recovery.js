@@ -52,7 +52,7 @@ function verifyMailerConfigured (req, res, next) {
 
 function verifyPasswordResetToken (req, res, next) {
   if (!req.query.token) {
-    return res.render('recovery/resetPassword', {
+    return res.render('recovery/resetPassword.jade', {
       error: 'Invalid reset code.'
     })
   }
@@ -60,7 +60,7 @@ function verifyPasswordResetToken (req, res, next) {
   OneTimeToken.peek(req.query.token, function (err, token) {
     if (err) { return next(err) }
     if (!token || token.use !== 'resetPassword') {
-      return res.render('recovery/resetPassword', {
+      return res.render('recovery/resetPassword.jade', {
         error: 'Invalid reset code.'
       })
     }
@@ -75,7 +75,7 @@ module.exports = function (server) {
     verifyPasswordsEnabled,
     verifyMailerConfigured,
     function (req, res, next) {
-      res.render('recovery/start')
+      res.render('recovery/start.jade')
     }
   )
 
@@ -87,14 +87,14 @@ module.exports = function (server) {
         !req.body.email ||
         !revalidator.validate.formats.email.test(req.body.email)
       ) {
-        return res.render('recovery/start', {
+        return res.render('recovery/start.jade', {
           error: 'Please enter a valid e-mail address.'
         })
       }
 
       User.getByEmail(req.body.email, function (err, user) {
         if (err) { return next(err) }
-        if (!user) { return res.render('recovery/emailSent') }
+        if (!user) { return res.render('recovery/emailSent.jade') }
 
         OneTimeToken.issue({
           sub: user._id,
@@ -116,7 +116,7 @@ module.exports = function (server) {
           }, function (err, responseStatus) {
             if (err) { }
             // TODO: REQUIRES REFACTOR TO MAIL QUEUE
-            res.render('recovery/emailSent')
+            res.render('recovery/emailSent.jade')
           })
         })
       })
@@ -128,7 +128,7 @@ module.exports = function (server) {
     verifyMailerConfigured,
     verifyPasswordResetToken,
     function (req, res, next) {
-      res.render('recovery/resetPassword')
+      res.render('recovery/resetPassword.jade')
     }
   )
 
@@ -140,7 +140,7 @@ module.exports = function (server) {
       var uid = req.passwordResetToken.sub
 
       if (req.body.password !== req.body.confirmPassword) {
-        return res.render('recovery/resetPassword', {
+        return res.render('recovery/resetPassword.jade', {
           validationError: 'Passwords do not match.'
         })
       }
@@ -150,7 +150,7 @@ module.exports = function (server) {
           err.name === 'PasswordRequiredError' ||
           err.name === 'InsecurePasswordError'
         )) {
-          return res.render('recovery/resetPassword', {
+          return res.render('recovery/resetPassword.jade', {
             validationError: err.message
           })
         }
@@ -172,7 +172,7 @@ module.exports = function (server) {
           }, function (err, responseStatus) {
             if (err) { }
             // TODO: REQUIRES REFACTOR TO MAIL QUEUE
-            res.render('recovery/passwordReset')
+            res.render('recovery/passwordReset.jade')
           })
         })
       })
