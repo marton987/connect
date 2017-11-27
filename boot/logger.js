@@ -88,9 +88,9 @@ module.exports = function (options) {
     var logsPath = path.join(cwd, 'logs')
     ensureWritableDirectory(logsPath)
 
-    if (options && options.stdout) { config.streams.push({ stream: process.stdout }) }
-    if (options && options.file) { config.streams.push({ path: path.join(logsPath, env + '.log') }) }
-    if (options && options.level) { config.level = options.level }
+    if (process.env.LOGGER_STDOUT) { config.streams.push({ stream: process.stdout }) }
+    if (process.env.LOGGER_FILE) { config.streams.push({ path: path.join(logsPath, env + '.log') }) }
+    if (process.env.LOGGER_LEVEL) { config.level = options.level }
 
     switch (config.level) {
       case 'fatal':

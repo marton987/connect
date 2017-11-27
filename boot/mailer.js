@@ -5,7 +5,6 @@
  */
 
 var nodemailer = require('nodemailer')
-var settings = require('./settings')
 var cons = require('consolidate')
 var htmlToText = require('html-to-text')
 var path = require('path')
@@ -74,22 +73,27 @@ exports.getMailer = function () {
     return mailer
   } else {
     var fromVerifier = /^(?:\w|\s)+<[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}>$/igm
-    var transport = settings.mailer &&
-      nodemailer.createTransport(settings.mailer)
+    var transport = nodemailer.createTransport({
+      from: process.env.MAILER_FROM,
+      view_engine: process.env.MAILER_VIEW_ENGINE,
+      service: process.env.MAILER_SERVICE,
+      auth: {
+        user: process.env.MAILER_AUTH_USER,
+        password: process.env.MAILER_AUTH_PASS
+      }
+    })
 
-    engineName = (settings.mailer && settings.mailer.view_engine) ||
-      settings.view_engine ||
-      'hogan'
+    engineName = process.env.MAILER_VIEW_ENGINE || 'hogan'
     engine = cons[engineName]
 
-    if (transport && (typeof settings.mailer.from !== 'string' ||
-      !fromVerifier.test(settings.mailer.from))) {
-      console.error(settings.mailer.from)
+    if (transport && (typeof process.env.MAILER_FROM !== 'string' ||
+      !fromVerifier.test(process.env.MAILER_FROM))) {
+      console.error(process.env.MAILER_FROM)
       throw new Error('From field not provided for mailer. ' +
         'Expected "Display Name <email@example.com>"')
     }
 
-    defaultFrom = settings.mailer && settings.mailer.from
+    defaultFrom = process.env.MAILER_FROM
 
     mailer = {
       from: defaultFrom,

@@ -2,7 +2,6 @@
  * Module dependencies
  */
 
-var settings = require('./settings')
 var Redis = require('ioredis')
 
 /**
@@ -15,7 +14,11 @@ exports.getClient = function () {
   if (client) {
     return client
   } else {
-    client = new Redis(settings.redis)
+    client = new Redis({
+      'host': process.env.REDIS_HOST || 'localhost',
+      'port': process.env.REDIS_PORT || '6379',
+      'password': process.env.REDIS_PASSWORD || ''
+    })
     return client
   }
 }

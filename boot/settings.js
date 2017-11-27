@@ -14,25 +14,6 @@ var config = path.join(cwd, 'config', env + '.json')
 var settings = {}
 
 /**
- * Load config
- */
-
-try {
-  config = require(config)
-} catch (e) {
-  if (env !== 'test') {
-    console.log('Cannot load ' + env + ' configuration')
-    process.exit(1)
-  } else {
-    config = {
-      issuer: 'http://localhost:3000',
-      cookie_secret: crypto.randomBytes(64).toString('hex'),
-      session_secret: crypto.randomBytes(64).toString('hex')
-    }
-  }
-}
-
-/**
  * Anvil Connect Version
  */
 
@@ -42,7 +23,17 @@ settings.version = pkg.version
  * Server Port
  */
 
-settings.port = process.env.PORT || settings.port || 3000
+settings.port = process.env.PORT || 3000
+
+/**
+ * Connect configuration
+ */
+
+config = {
+  issuer: process.env.ISSUER || 'http://localhost:3000/',
+  cookie_secret: process.env.COOKIE_SECRET || 'cookie_secret',
+  session_secret: process.env.SESSION_SECRET || 'session_secret'
+}
 
 /**
  * client_registration
@@ -52,7 +43,7 @@ settings.port = process.env.PORT || settings.port || 3000
  *    `client_registration` can be set to `dynamic`, `token`, or `scoped`.
  */
 
-settings.client_registration = 'scoped'
+settings.client_registration = process.env.CLIENT_REGISTRATION || 'scoped'
 
 /**
  * trusted_registration_scope
@@ -62,7 +53,7 @@ settings.client_registration = 'scoped'
  *    overridden if required.
  */
 
-settings.trusted_registration_scope = 'realm'
+settings.trusted_registration_scope = process.env.TRUSTED_REGISTRATION_SCOPE || 'realm'
 
 /**
  * providers
@@ -452,23 +443,6 @@ Object.keys(config).forEach(function (key) {
 settings.keys = keys
 
 /**
- * Required Configuration Values
- */
-
-/**
- * issuer
- *   REQUIRED. URL using the https scheme with no query or fragment component
- *   that the OP asserts as its Issuer Identifier. If Issuer discovery is
- *   supported (see Section 2), this value MUST be identical to the issuer
- *   value returned by WebFinger. This also MUST be identical to the iss Claim
- *   value in ID Tokens issued from this Issuer.
- */
-
-if (!settings.issuer) {
-  throw new Error('Issuer must be configured')
-}
-
-/**
  * Always enable password provider
  *
  * Authority users always need to be able to sign in to administer the server
@@ -489,7 +463,7 @@ if (!settings.providers.password) {
  * Config-file dependenct settings
  */
 
-var issuer = settings.issuer
+var issuer = process.env.ISSUER || 'https://localhost:3000/'
 
 /**
  * authorization_endpoint
